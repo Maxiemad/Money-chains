@@ -83,8 +83,8 @@ export function Pricing() {
       {/* giant watermark headline backdrop */}
       <div className="c3-watermark-container">
         <div className="c3-watermark-main">
-          <span className="c3-watermark-line-1">Your skills.</span>
-          <span className="c3-watermark-line-2">Monetized</span>
+          <span className="c3-watermark-line-1">Pick a chain.</span>
+          <span className="c3-watermark-line-2">Start earning.</span>
         </div>
       </div>
 
