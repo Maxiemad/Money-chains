@@ -90,21 +90,71 @@ const mockProvider: ContentProvider = {
   },
 };
 
-/** Real Claude provider — lazily used only if a key is configured. */
-const claudeProvider: ContentProvider = {
-  name: "claude",
+function creditsForKind(kind: ContentKind): number {
+  switch (kind) {
+    case "blog_post":
+      return 8;
+    case "newsletter":
+      return 5;
+    case "caption":
+      return 3;
+    case "product_blurb":
+      return 3;
+    default:
+      return 2;
+  }
+}
+
+/**
+ * Real Groq provider — fast Llama-based generation via the Groq API. Used
+ * whenever GROQ_API_KEY is set. Any failure falls back to the deterministic
+ * mock so the content flow never breaks.
+ */
+const groqProvider: ContentProvider = {
+  name: "groq",
   async generate(args) {
-    // Intentionally thin: wire the Anthropic SDK here. Falls back to mock if
-    // anything is missing so the demo never breaks.
-    if (!process.env.CLAUDE_API_KEY) return mockProvider.generate(args);
-    // const client = new Anthropic({ apiKey: process.env.CLAUDE_API_KEY })
-    // const msg = await client.messages.create({ model: "claude-opus-4-8", ... })
-    return mockProvider.generate(args); // replace with parsed response
+    const key = process.env.GROQ_API_KEY;
+    if (!key) return mockProvider.generate(args);
+    const { step, niche } = args;
+    const kind = kindForStep(step);
+    const n = niche.trim() || "your niche";
+    try {
+      const { default: Groq } = await import("groq-sdk");
+      const client = new Groq({ apiKey: key });
+      const model = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+      const completion = await client.chat.completions.create({
+        model,
+        temperature: 0.7,
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "system",
+            content:
+              'You are MoneyChains\' content engine. You write honest, useful, conversion-aware content for creators monetizing their skills. Never promise guaranteed income. Always reply as strict JSON: {"title": string, "body": string}. Body may use markdown.',
+          },
+          {
+            role: "user",
+            content: `Task: ${step.title}\nDescription: ${step.description}\nContent type: ${kind}\nNiche: ${n}\n\nWrite a ready-to-edit draft for this exact step. Keep it specific to the niche and platform.`,
+          },
+        ],
+      });
+      const raw = completion.choices[0]?.message?.content ?? "{}";
+      const parsed = JSON.parse(raw) as { title?: string; body?: string };
+      if (!parsed.title || !parsed.body) return mockProvider.generate(args);
+      return {
+        kind,
+        title: parsed.title,
+        body: parsed.body,
+        creditsUsed: creditsForKind(kind),
+      };
+    } catch {
+      return mockProvider.generate(args);
+    }
   },
 };
 
 function provider(): ContentProvider {
-  return process.env.CLAUDE_API_KEY ? claudeProvider : mockProvider;
+  return process.env.GROQ_API_KEY ? groqProvider : mockProvider;
 }
 
 export async function generateContent(
