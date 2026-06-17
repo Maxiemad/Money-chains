@@ -1,5 +1,6 @@
-import { redirect } from "next/navigation";
+import { LandingPage } from "@/components/landing/landing-page";
 
+// Root route — the cinematic MoneyChains landing page (everything on one domain).
 export default function Page() {
-  redirect("/about");
+  return <LandingPage />;
 }
