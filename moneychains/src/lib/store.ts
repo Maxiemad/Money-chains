@@ -56,6 +56,17 @@ function seed(): DB {
     xp: 9999,
     streak: 40,
   };
+  const owner: User = {
+    id: "u_owner",
+    name: "Akanksha",
+    email: "akanksha.mmo@gmail.com",
+    avatarColor: "#a855f7",
+    role: "admin",
+    plan: "agency",
+    createdAt: "2026-01-01T09:00:00.000Z",
+    xp: 9999,
+    streak: 40,
+  };
 
   // Demo user has connected Amazon + Blog, but NOT Pinterest yet — so the
   // workspace has a live, do-able next step.
@@ -155,7 +166,7 @@ function seed(): DB {
   ];
 
   return {
-    users: [demo, admin],
+    users: [demo, admin, owner],
     connections,
     userChains: [userChain],
     content,

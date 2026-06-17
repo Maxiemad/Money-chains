@@ -3,12 +3,15 @@ import { Logo } from "@/components/brand/logo";
 import { Card, Input } from "@/components/ui/primitives";
 import { Button } from "@/components/ui/button";
 import { loginAction, demoLoginAction } from "@/lib/actions";
+import { sessionUser } from "@/services/auth";
+import { redirect } from "next/navigation";
 
 export default async function LoginPage({
   searchParams,
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
+  if (await sessionUser()) redirect("/app");
   const { error } = await searchParams;
   return (
     <div className="flex min-h-screen items-center justify-center bg-cloud px-5 py-12">

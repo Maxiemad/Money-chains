@@ -4,6 +4,8 @@ import { Logo } from "@/components/brand/logo";
 import { Card, Input } from "@/components/ui/primitives";
 import { Button } from "@/components/ui/button";
 import { signupAction } from "@/lib/actions";
+import { sessionUser } from "@/services/auth";
+import { redirect } from "next/navigation";
 
 const PERKS = [
   "1 active money chain, free forever",
@@ -12,7 +14,8 @@ const PERKS = [
   "OAuth security — we never see your passwords",
 ];
 
-export default function SignupPage() {
+export default async function SignupPage() {
+  if (await sessionUser()) redirect("/app");
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       {/* form */}

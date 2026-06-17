@@ -344,6 +344,15 @@ h3,
 .theme-dark .text-navy {
   color: #e9eefc !important;
 }
+.theme-dark .text-navy\/80 {
+  color: rgba(233, 238, 252, 0.82) !important;
+}
+.theme-dark .text-navy\/70 {
+  color: rgba(233, 238, 252, 0.72) !important;
+}
+.theme-dark .text-navy\/60 {
+  color: rgba(233, 238, 252, 0.62) !important;
+}
 .theme-dark .text-muted {
   color: #97a1b6 !important;
 }
