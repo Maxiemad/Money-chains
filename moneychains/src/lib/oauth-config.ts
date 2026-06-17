@@ -29,7 +29,9 @@ export const OAUTH_PROVIDERS: Record<string, OAuthProviderConfig> = {
     platformId: "pinterest",
     authorizeUrl: "https://www.pinterest.com/oauth/",
     tokenUrl: "https://api.pinterest.com/v5/oauth/token",
-    scopes: ["user_accounts:read", "boards:read", "pins:read", "pins:write"],
+    // Trial access grants read scopes only; add "pins:write" after Pinterest
+    // approves write/standard access for the app.
+    scopes: ["user_accounts:read", "boards:read", "pins:read"],
     clientIdEnv: "PINTEREST_CLIENT_ID",
     clientSecretEnv: "PINTEREST_CLIENT_SECRET",
     tokenAuth: "basic",
