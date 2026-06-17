@@ -45,7 +45,7 @@ function BrandButton({ label = "Start free", full = false }: { label?: string; f
         full ? "w-full" : ""
       }`}
     >
-      <LogoGlyph className="h-4 w-4 rounded-md" />
+      <LogoGlyph className="h-4 w-auto" />
       {label}
       <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-[1px]" />
     </a>
