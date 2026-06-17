@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+/*
+  MoneyChains design system.
+  Premium fintech-meets-creator-tool. Dark hero + light content "sandwich".
+  Colors are exposed to Tailwind v4 via @theme so utilities like `bg-navy`,
+  `text-mint`, `border-panel` are auto-generated.
+*/
+@theme {
+  --color-navy: #0e1a38; /* page background (dark sections) */
+  --color-panel: #16264f; /* raised panel on navy */
+  --color-panel2: #1d3164; /* hover / lighter panel */
+  --color-teal: #02a37a; /* primary accent */
+  --color-mint: #27d8a0; /* bright accent (money/growth) */
+  --color-ink: #e8f0ff; /* light text on dark */
+  --color-muted: #5a6a85; /* muted text */
+  --color-cloud: #f4f7fb; /* light content panels */
+  --color-line: #e3e9f2; /* light borders */
+
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+
+  --radius-card: 14px;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #0e1a38;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Glassy panel used on the dark hero */
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Subtle teal glow used behind money/earnings figures */
+.glow-mint {
+  box-shadow: 0 0 0 1px rgba(39, 216, 160, 0.18), 0 12px 40px -12px rgba(39, 216, 160, 0.35);
+}
+
+/* Animated gradient mesh for the hero backdrop */
+.mesh {
+  background:
+    radial-gradient(50% 60% at 15% 20%, rgba(2, 163, 122, 0.35) 0%, transparent 60%),
+    radial-gradient(45% 55% at 85% 15%, rgba(39, 216, 160, 0.22) 0%, transparent 55%),
+    radial-gradient(60% 70% at 75% 90%, rgba(29, 49, 100, 0.6) 0%, transparent 60%);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(90, 106, 133, 0.4);
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

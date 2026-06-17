@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "moneychains",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "moneychains",
+      "port": 3000
+    },
+    {
+      "name": "moneychains-landing",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "moneychains-landing",
+      "port": 5173
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+# dependencies
+**/node_modules/
+
+# build outputs
+**/.next/
+**/dist/
+**/build/
+**/.turbo/
+**/out/
+
+# env
+**/.env
+**/.env.local
+**/.env*.local
+
+# logs
+**/*.log
+npm-debug.log*
+
+# os / editor
+.DS_Store
+.idea/
+.vscode/
+
+# local-only Claude settings (keep launch.json, drop machine settings)
+.claude/settings.local.json
+
+# unrelated to this product
+gotoretreats-prompt-library.md

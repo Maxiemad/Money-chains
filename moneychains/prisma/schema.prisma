@@ -1,0 +1,188 @@
+// MoneyChains — Postgres schema (Supabase).
+//
+// This mirrors the domain types in src/lib/types.ts and the mock store in
+// src/lib/store.ts. The app currently runs on the in-memory mock; to go live,
+// generate the client, point DATABASE_URL at Supabase, and swap the store's
+// read/write helpers for Prisma queries. Enable Row Level Security so users
+// only ever touch their own rows.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  user
+  admin
+}
+
+enum Plan {
+  free
+  starter
+  pro
+  agency
+}
+
+enum ConnectionType {
+  oauth
+  api_key
+  manual
+}
+
+enum ConnectionStatus {
+  connected
+  disconnected
+  needs_reauth
+}
+
+enum UserChainStatus {
+  active
+  paused
+  completed
+}
+
+model User {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  avatarColor String   @default("#27d8a0")
+  role        Role     @default(user)
+  plan        Plan     @default(free)
+  xp          Int      @default(0)
+  streak      Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  connections  Connection[]
+  userChains   UserChain[]
+  content      GeneratedContent[]
+  earnings     Earning[]
+  achievements Achievement[]
+  usage        UsageRecord?
+  subscription Subscription?
+}
+
+// Stores ENCRYPTED tokens only — never third-party passwords.
+model Connection {
+  id              String           @id @default(cuid())
+  userId          String
+  platformId      String
+  type            ConnectionType
+  status          ConnectionStatus @default(connected)
+  accessTokenEnc  String?
+  refreshTokenEnc String?
+  accountLabel    String?
+  lastSyncedAt    DateTime?
+  createdAt       DateTime         @default(now())
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, platformId])
+  @@index([userId])
+}
+
+// Chain templates are data. Steps live as JSON for flexibility (add chains
+// without migrations), matching src/data/templates.ts.
+model ChainTemplate {
+  id                  String      @id
+  slug                String      @unique
+  name                String
+  tagline             String
+  description         String
+  category            String
+  flow                String[]
+  requiredConnections String[]
+  steps               Json
+  effort              String
+  difficulty          String
+  timeToFirstEarning  String
+  earningRange        String
+  automated           Boolean     @default(false)
+  proven              Boolean     @default(false)
+  userChains          UserChain[]
+}
+
+model UserChain {
+  id             String          @id @default(cuid())
+  userId         String
+  templateId     String
+  status         UserChainStatus @default(active)
+  niche          String?
+  steps          Json // UserChainStep[]
+  startedAt      DateTime        @default(now())
+  firstEarningAt DateTime?
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template       ChainTemplate   @relation(fields: [templateId], references: [id])
+  content        GeneratedContent[]
+  earnings       Earning[]
+
+  @@index([userId])
+}
+
+model GeneratedContent {
+  id          String    @id @default(cuid())
+  userId      String
+  userChainId String
+  stepId      String
+  kind        String
+  title       String
+  body        String
+  approved    Boolean   @default(false)
+  creditsUsed Int       @default(0)
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userChain   UserChain @relation(fields: [userChainId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Earning {
+  id          String     @id @default(cuid())
+  userId      String
+  userChainId String?
+  platformId  String?
+  source      String
+  amount      Int // stored in paise or whole INR per your choice
+  note        String?
+  utm         String?
+  occurredAt  DateTime   @default(now())
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userChain   UserChain? @relation(fields: [userChainId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([userChainId])
+}
+
+model Achievement {
+  id       String   @id @default(cuid())
+  userId   String
+  key      String
+  label    String
+  earnedAt DateTime @default(now())
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+}
+
+model UsageRecord {
+  userId             String   @id
+  aiCreditsUsed      Int      @default(0)
+  aiCreditsLimit     Int      @default(50)
+  automationRunsUsed Int      @default(0)
+  automationRunsLimit Int     @default(0)
+  periodStart        DateTime @default(now())
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  plan               Plan     @default(free)
+  stripeCustomerId   String?
+  stripeSubscriptionId String?
+  status             String   @default("active")
+  currentPeriodEnd   DateTime?
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
