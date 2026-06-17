@@ -59,6 +59,31 @@ function BrandButton({ label = "Start free", full = false }: { label?: string; f
   );
 }
 
+type SessionUser = { name: string; avatarColor: string } | null;
+
+function initials(name: string) {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+function Avatar({ user }: { user: NonNullable<SessionUser> }) {
+  return (
+    <a
+      href="/app"
+      aria-label="Go to your workspace"
+      title={`${user.name} · open workspace`}
+      className="inline-flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold text-black ring-2 ring-white/20 transition-transform hover:scale-105"
+      style={{ background: user.avatarColor }}
+    >
+      {initials(user.name)}
+    </a>
+  );
+}
+
 function SectionEyebrow({ label, tag }: { label: string; tag?: string }) {
   return (
     <div className="inline-flex items-center gap-2 text-sm text-white/70">
@@ -132,7 +157,7 @@ const LINKS = [
   { label: "About", href: "#site-footer" },
 ];
 
-function Navbar() {
+function Navbar({ user }: { user: SessionUser }) {
   const [open, setOpen] = useState(false);
   return (
     <motion.nav
@@ -161,10 +186,27 @@ function Navbar() {
       </div>
 
       <div className="hidden md:flex items-center gap-3">
-        <a href="/login" className="text-white/70 text-sm font-medium hover:text-white transition-colors">
-          Log in
-        </a>
-        <BrandButton label="Start free" />
+        {user ? (
+          <>
+            <a
+              href="/app"
+              className="text-white/70 text-sm font-medium hover:text-white transition-colors"
+            >
+              Workspace
+            </a>
+            <Avatar user={user} />
+          </>
+        ) : (
+          <>
+            <a
+              href="/login"
+              className="text-white/70 text-sm font-medium hover:text-white transition-colors"
+            >
+              Log in
+            </a>
+            <BrandButton label="Start free" />
+          </>
+        )}
       </div>
 
       <button
@@ -188,16 +230,28 @@ function Navbar() {
                 {link.label}
               </a>
             ))}
-            <a
-              href="/login"
-              onClick={() => setOpen(false)}
-              className="text-white/80 text-sm font-medium py-2 px-2 rounded-lg hover:bg-white/5"
-            >
-              Log in
-            </a>
-            <div className="mt-2">
-              <BrandButton label="Start free" full />
-            </div>
+            {user ? (
+              <a
+                href="/app"
+                onClick={() => setOpen(false)}
+                className="text-white/80 text-sm font-medium py-2 px-2 rounded-lg hover:bg-white/5"
+              >
+                Open workspace
+              </a>
+            ) : (
+              <>
+                <a
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="text-white/80 text-sm font-medium py-2 px-2 rounded-lg hover:bg-white/5"
+                >
+                  Log in
+                </a>
+                <div className="mt-2">
+                  <BrandButton label="Start free" full />
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -680,14 +734,14 @@ function FinalCTA() {
 /* ------------------------------------------------------------------ */
 /* Page                                                                */
 /* ------------------------------------------------------------------ */
-export function LandingPage() {
+export function LandingPage({ user = null }: { user?: SessionUser }) {
   return (
     <div id="top" className="landing-root relative min-h-screen overflow-x-hidden bg-[#0c0c0c] text-white">
       <RootNoiseFilter />
       <BackgroundVideo />
 
       <div className="relative z-10">
-        <Navbar />
+        <Navbar user={user} />
         <Hero />
         <AppMockup />
         <FeatureGuide />

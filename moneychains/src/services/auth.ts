@@ -21,6 +21,17 @@ export async function currentUser(): Promise<User> {
   return (id && getUser(id)) || getUser(DEMO_ID)!;
 }
 
+/**
+ * Real session check — returns the logged-in user ONLY if a session cookie is
+ * present (no demo fallback). Used by public pages (landing) to decide whether
+ * to show the avatar vs. the "Log in / Start free" buttons.
+ */
+export async function sessionUser(): Promise<User | null> {
+  const jar = await cookies();
+  const id = jar.get(COOKIE)?.value;
+  return (id && getUser(id)) || null;
+}
+
 export async function setSession(userId: string): Promise<void> {
   const jar = await cookies();
   jar.set(COOKIE, userId, {
