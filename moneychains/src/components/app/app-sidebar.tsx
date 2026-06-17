@@ -33,7 +33,7 @@ export function AppSidebar({ isAdmin }: { isAdmin: boolean }) {
     exact ? pathname === href : pathname.startsWith(href);
 
   return (
-    <aside className="hidden w-60 shrink-0 flex-col border-r border-white/10 bg-navy px-3 py-5 md:flex">
+    <aside className="z-40 hidden w-60 shrink-0 flex-col overflow-y-auto border-r border-white/10 bg-navy px-3 py-5 md:flex md:fixed md:inset-y-0 md:left-0">
       <div className="px-2">
         <Logo light />
       </div>

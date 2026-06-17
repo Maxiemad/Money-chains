@@ -3,10 +3,12 @@ import {
   Bell,
   Download,
   Lock,
+  Palette,
   ShieldCheck,
   Trash2,
   User as UserIcon,
 } from "lucide-react";
+import { ThemeChoice } from "@/components/app/theme-provider";
 import { Card, Badge, Input } from "@/components/ui/primitives";
 import { Button } from "@/components/ui/button";
 import { currentUser } from "@/services/auth";
@@ -87,6 +89,25 @@ export default async function SettingsPage() {
           </div>
           <Button type="submit">Save changes</Button>
         </form>
+      </Card>
+
+      {/* Appearance */}
+      <Card className="p-5">
+        <div className="flex items-center gap-2 text-muted">
+          <Palette className="h-4 w-4" />
+          <h2 className="font-display text-base font-semibold text-navy">
+            Appearance
+          </h2>
+        </div>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-navy">Theme</p>
+            <p className="text-xs text-muted">
+              Dark is the default. Your choice is saved on this device.
+            </p>
+          </div>
+          <ThemeChoice />
+        </div>
       </Card>
 
       {/* Notifications */}

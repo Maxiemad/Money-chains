@@ -322,6 +322,55 @@ h3,
   background: #fff;
 }
 
+/* ===================================================================== */
+/* App DARK theme — scoped overrides of the light-first utility classes. */
+/* Applied via .theme-dark on the /app shell (default). Toggle in Settings. */
+/* ===================================================================== */
+.theme-dark {
+  color-scheme: dark;
+}
+.theme-dark .bg-cloud {
+  background-color: #0b0c10 !important;
+}
+.theme-dark .bg-white {
+  background-color: #15171f !important;
+}
+.theme-dark .bg-white\/90 {
+  background-color: rgba(21, 23, 31, 0.9) !important;
+}
+.theme-dark .bg-white\/5 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+.theme-dark .text-navy {
+  color: #e9eefc !important;
+}
+.theme-dark .text-muted {
+  color: #97a1b6 !important;
+}
+.theme-dark .text-ink {
+  color: #e9eefc !important;
+}
+.theme-dark .border-line {
+  border-color: rgba(255, 255, 255, 0.09) !important;
+}
+.theme-dark .shadow-sm,
+.theme-dark .shadow,
+.theme-dark .shadow-md {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+}
+/* inputs / readonly fields */
+.theme-dark input,
+.theme-dark textarea,
+.theme-dark select {
+  background-color: #0f1117 !important;
+  color: #e9eefc !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+.theme-dark input::placeholder,
+.theme-dark textarea::placeholder {
+  color: #6b748a !important;
+}
+
 @media (max-width: 1024px) {
   .c3-watermark-main {
     font-size: 3.5rem;

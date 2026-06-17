@@ -2,6 +2,7 @@ import { Flame, Zap } from "lucide-react";
 import { logoutAction } from "@/lib/actions";
 import type { User, UsageRecord } from "@/lib/types";
 import { Badge } from "@/components/ui/primitives";
+import { ThemeToggle } from "@/components/app/theme-provider";
 
 export function AppTopbar({
   user,
@@ -28,6 +29,7 @@ export function AppTopbar({
         <span className="hidden text-xs font-medium uppercase tracking-wide text-muted sm:inline">
           {user.plan} plan
         </span>
+        <ThemeToggle />
         <span
           className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold text-navy"
           style={{ background: user.avatarColor }}

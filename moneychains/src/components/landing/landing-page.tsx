@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { CSSProperties } from "react";
 import { motion } from "framer-motion";
+import { Logo, LogoGlyph } from "@/components/brand/logo";
 import {
   ChevronRight,
   Menu,
@@ -36,14 +37,6 @@ const VIDEO_SRC =
 /* ------------------------------------------------------------------ */
 /* Primitives                                                          */
 /* ------------------------------------------------------------------ */
-function LogoMark({ className = "w-8 h-8" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 256 256" className={className} fill="currentColor" aria-label="MoneyChains">
-      <path d="M 0 128 C 70.692 128 128 185.308 128 256 L 64 256 C 64 220.654 35.346 192 0 192 Z M 256 192 C 220.654 192 192 220.654 192 256 L 128 256 C 128 185.308 185.308 128 256 128 Z M 128 0 C 128 70.692 70.692 128 0 128 L 0 64 C 35.346 64 64 35.346 64 0 Z M 192 0 C 192 35.346 220.654 64 256 64 L 256 128 C 185.308 128 128 70.692 128 0 Z" />
-    </svg>
-  );
-}
-
 function BrandButton({ label = "Start free", full = false }: { label?: string; full?: boolean }) {
   return (
     <a
@@ -52,7 +45,7 @@ function BrandButton({ label = "Start free", full = false }: { label?: string; f
         full ? "w-full" : ""
       }`}
     >
-      <LogoMark className="w-4 h-4 text-black" />
+      <LogoGlyph className="h-4 w-4 rounded-md" />
       {label}
       <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-[1px]" />
     </a>
@@ -166,9 +159,7 @@ function Navbar({ user }: { user: SessionUser }) {
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="relative z-30 max-w-6xl mx-auto px-6 py-5 flex items-center justify-between"
     >
-      <a href="#top" aria-label="MoneyChains home">
-        <LogoMark className="w-8 h-8 text-white" />
-      </a>
+      <Logo href="#top" light />
 
       <div className="hidden md:flex gap-8">
         {LINKS.map((link, i) => (
@@ -754,10 +745,7 @@ export function LandingPage({ user = null }: { user?: SessionUser }) {
           id="site-footer"
           className="relative z-10 max-w-6xl mx-auto px-6 py-12 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4"
         >
-          <div className="flex items-center gap-2 text-white/60">
-            <LogoMark className="w-6 h-6 text-white/80" />
-            <span className="text-sm font-semibold text-white">MoneyChains</span>
-          </div>
+          <Logo href="#top" light />
           <p className="text-xs text-white/40 text-center">
             The Zapier for making money online. No guaranteed income — just proven tools, honest
             ranges, and real attribution.
