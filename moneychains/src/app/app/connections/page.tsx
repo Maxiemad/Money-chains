@@ -1,6 +1,6 @@
 import { ShieldCheck, Plug, KeyRound, Hand } from "lucide-react";
 import { Card, Badge } from "@/components/ui/primitives";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { PlatformIcon } from "@/components/brand/platform-icon";
 import { currentUser } from "@/services/auth";
 import { connectionsFor } from "@/lib/store";
@@ -83,6 +83,10 @@ export default async function ConnectionsPage() {
                           Disconnect
                         </Button>
                       </form>
+                    ) : p.type === "oauth" ? (
+                      <ButtonLink href={`/api/oauth/${p.id}/start`} size="sm">
+                        Connect
+                      </ButtonLink>
                     ) : (
                       <form action={connectAction} className="flex gap-2">
                         <input type="hidden" name="platformId" value={p.id} />

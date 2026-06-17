@@ -227,6 +227,37 @@ export async function getUserByEmail(email: string): Promise<User | undefined> {
 export async function connectionsFor(userId: string): Promise<Connection[]> {
   return (await getDb()).connections.filter((c) => c.userId === userId);
 }
+/** Create or refresh a connection (used by the OAuth callback + sandbox). */
+export async function saveConnection(
+  userId: string,
+  platformId: string,
+  data: { type: Connection["type"]; token: string; label: string }
+): Promise<void> {
+  const db = await getDb();
+  const now = new Date().toISOString();
+  const existing = db.connections.find(
+    (c) => c.userId === userId && c.platformId === platformId
+  );
+  if (existing) {
+    existing.status = "connected";
+    existing.accessTokenEnc = data.token;
+    existing.accountLabel = data.label;
+    existing.lastSyncedAt = now;
+  } else {
+    db.connections.push({
+      id: newId("c"),
+      userId,
+      platformId,
+      type: data.type,
+      status: "connected",
+      accessTokenEnc: data.token,
+      accountLabel: data.label,
+      lastSyncedAt: now,
+      createdAt: now,
+    });
+  }
+  await persist(db);
+}
 export async function userChainsFor(userId: string): Promise<UserChain[]> {
   return (await getDb()).userChains.filter((c) => c.userId === userId);
 }
