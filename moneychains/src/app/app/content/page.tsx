@@ -31,8 +31,8 @@ export default async function ContentLibraryPage({
 }) {
   const { kind } = await searchParams;
   const user = await currentUser();
-  const all = contentFor(user.id);
-  const chains = userChainsFor(user.id);
+  const all = await contentFor(user.id);
+  const chains = await userChainsFor(user.id);
 
   const activeKind =
     kind && KINDS.some((k) => k.key === kind) ? (kind as ContentKind) : "all";

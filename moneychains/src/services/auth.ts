@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import type { User } from "@/lib/types";
-import { getUser, getUserByEmail, db, newId } from "@/lib/store";
+import { getUser, getUserByEmail, getDb, persist, newId } from "@/lib/store";
 
 /**
  * Auth service (mock of Supabase Auth).
@@ -18,7 +18,7 @@ const DEMO_ID = "u_demo";
 export async function currentUser(): Promise<User> {
   const jar = await cookies();
   const id = jar.get(COOKIE)?.value;
-  return (id && getUser(id)) || getUser(DEMO_ID)!;
+  return ((id ? await getUser(id) : undefined) ?? (await getUser(DEMO_ID)))!;
 }
 
 /**
@@ -29,7 +29,7 @@ export async function currentUser(): Promise<User> {
 export async function sessionUser(): Promise<User | null> {
   const jar = await cookies();
   const id = jar.get(COOKIE)?.value;
-  return (id && getUser(id)) || null;
+  return (id ? await getUser(id) : undefined) ?? null;
 }
 
 export async function setSession(userId: string): Promise<void> {
@@ -49,7 +49,7 @@ export async function clearSession(): Promise<void> {
 
 /** Mock email/password login. Any password is accepted in the demo. */
 export async function login(email: string): Promise<User | null> {
-  const user = getUserByEmail(email);
+  const user = await getUserByEmail(email);
   if (!user) return null;
   await setSession(user.id);
   return user;
@@ -57,11 +57,12 @@ export async function login(email: string): Promise<User | null> {
 
 /** Mock signup — creates a fresh free-tier user. */
 export async function signup(name: string, email: string): Promise<User> {
-  const existing = getUserByEmail(email);
+  const existing = await getUserByEmail(email);
   if (existing) {
     await setSession(existing.id);
     return existing;
   }
+  const db = await getDb();
   const user: User = {
     id: newId("u"),
     name,
@@ -81,6 +82,7 @@ export async function signup(name: string, email: string): Promise<User> {
     automationRunsUsed: 0,
     automationRunsLimit: 0,
   });
+  await persist(db);
   await setSession(user.id);
   return user;
 }

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { currentUser } from "@/services/auth";
-import { db } from "./store";
+import { getDb, persist } from "./store";
 
 const DEMO_ID = "u_demo";
 
@@ -12,8 +12,10 @@ export async function updateProfileAction(formData: FormData) {
   const name = String(formData.get("name") || "").trim();
   if (!name) return;
 
+  const db = await getDb();
   const dbUser = db.users.find((u) => u.id === user.id);
   if (dbUser) dbUser.name = name;
+  await persist(db);
 
   revalidatePath("/app/settings");
   revalidatePath("/app");
@@ -39,6 +41,7 @@ export async function deleteAccountAction() {
     return;
   }
 
+  const db = await getDb();
   db.users = db.users.filter((u) => u.id !== user.id);
   db.connections = db.connections.filter((c) => c.userId !== user.id);
   db.userChains = db.userChains.filter((c) => c.userId !== user.id);
@@ -46,6 +49,7 @@ export async function deleteAccountAction() {
   db.earnings = db.earnings.filter((e) => e.userId !== user.id);
   db.achievements = db.achievements.filter((a) => a.userId !== user.id);
   db.usage = db.usage.filter((u) => u.userId !== user.id);
+  await persist(db);
 
   revalidatePath("/app/settings");
   revalidatePath("/app");

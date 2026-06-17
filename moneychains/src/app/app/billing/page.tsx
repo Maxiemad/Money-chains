@@ -72,7 +72,7 @@ export default async function BillingPage({
   searchParams: Promise<{ gated?: string }>;
 }) {
   const user = await currentUser();
-  const usage = usageFor(user.id);
+  const usage = await usageFor(user.id);
   const plan = getPlan(user.plan)!;
   const { gated } = await searchParams;
   const gate = gated ? GATE_COPY[gated] : undefined;

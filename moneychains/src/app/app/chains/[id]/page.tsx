@@ -11,18 +11,18 @@ export default async function ChainWorkspacePage({
 }) {
   const { id } = await params;
   const user = await currentUser();
-  const chain = userChain(id);
+  const chain = await userChain(id);
   if (!chain || chain.userId !== user.id) notFound();
   const template = getTemplate(chain.templateId);
   if (!template) notFound();
 
-  const connections = connectionsFor(user.id).map((c) => ({
+  const connections = (await connectionsFor(user.id)).map((c) => ({
     platformId: c.platformId,
     status: c.status,
     label: c.accountLabel,
   }));
 
-  const content = contentFor(user.id).filter((c) => c.userChainId === chain.id);
+  const content = (await contentFor(user.id)).filter((c) => c.userChainId === chain.id);
 
   return (
     <Workspace

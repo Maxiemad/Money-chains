@@ -16,7 +16,7 @@ const TYPE_META = {
 
 export default async function ConnectionsPage() {
   const user = await currentUser();
-  const conns = connectionsFor(user.id);
+  const conns = await connectionsFor(user.id);
 
   return (
     <div className="space-y-6">

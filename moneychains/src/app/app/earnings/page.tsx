@@ -11,8 +11,8 @@ import { inr, timeAgo } from "@/lib/utils";
 
 export default async function EarningsPage() {
   const user = await currentUser();
-  const earnings = earningsFor(user.id);
-  const chains = userChainsFor(user.id);
+  const earnings = await earningsFor(user.id);
+  const chains = await userChainsFor(user.id);
 
   const total = earnings.reduce((s, e) => s + e.amount, 0);
 

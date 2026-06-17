@@ -13,9 +13,11 @@ export interface LimitCheck {
   upgradeTo?: string;
 }
 
-export function canStartChain(user: User): LimitCheck {
+export async function canStartChain(user: User): Promise<LimitCheck> {
   const plan = getPlan(user.plan)!;
-  const active = userChainsFor(user.id).filter((c) => c.status === "active").length;
+  const active = (await userChainsFor(user.id)).filter(
+    (c) => c.status === "active"
+  ).length;
   if (plan.limits.activeChains === "Unlimited") return { allowed: true };
   if (active < plan.limits.activeChains) return { allowed: true };
   return {
@@ -25,8 +27,11 @@ export function canStartChain(user: User): LimitCheck {
   };
 }
 
-export function canGenerateContent(user: User, credits: number): LimitCheck {
-  const usage = usageFor(user.id);
+export async function canGenerateContent(
+  user: User,
+  credits: number
+): Promise<LimitCheck> {
+  const usage = await usageFor(user.id);
   if (usage.aiCreditsUsed + credits <= usage.aiCreditsLimit) return { allowed: true };
   return {
     allowed: false,

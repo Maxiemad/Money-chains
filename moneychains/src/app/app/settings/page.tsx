@@ -42,7 +42,7 @@ const NOTIFICATIONS = [
 
 export default async function SettingsPage() {
   const user = await currentUser();
-  const connections = connectionsFor(user.id);
+  const connections = await connectionsFor(user.id);
   const connectedCount = connections.filter(
     (c) => c.status === "connected"
   ).length;

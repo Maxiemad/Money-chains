@@ -84,7 +84,7 @@ const LEADERBOARD: { handle: string; earned: number }[] = [
 
 export default async function AchievementsPage() {
   const user = await currentUser();
-  const earned = achievementsFor(user.id);
+  const earned = await achievementsFor(user.id);
   const earnedMap = new Map(earned.map((a) => [a.key, a]));
 
   const xp = user.xp;
@@ -93,7 +93,7 @@ export default async function AchievementsPage() {
   const pct = Math.min(100, intoLevel);
   const xpToNext = 100 - intoLevel;
 
-  const myTotal = earningsFor(user.id).reduce((s, e) => s + e.amount, 0);
+  const myTotal = (await earningsFor(user.id)).reduce((s, e) => s + e.amount, 0);
 
   // Insert the current user into the leaderboard, ranked by total earned.
   const rows = [

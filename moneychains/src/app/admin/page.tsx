@@ -12,7 +12,7 @@ import {
 import { Card, Badge } from "@/components/ui/primitives";
 import { Button } from "@/components/ui/button";
 import { currentUser } from "@/services/auth";
-import { db } from "@/lib/store";
+import { getDb } from "@/lib/store";
 import { TEMPLATES } from "@/data/templates";
 import { enterAdminDemoAction } from "@/lib/admin-actions";
 import { inr, timeAgo } from "@/lib/utils";
@@ -79,6 +79,7 @@ export default async function AdminPage() {
   }
 
   /* ----------------------------- metrics ----------------------------- */
+  const db = await getDb();
   const totalUsers = db.users.length;
 
   const userIdsWithChain = new Set(db.userChains.map((c) => c.userId));

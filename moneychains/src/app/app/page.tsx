@@ -17,8 +17,8 @@ import { inr } from "@/lib/utils";
 
 export default async function DashboardPage() {
   const user = await currentUser();
-  const chains = userChainsFor(user.id);
-  const earnings = earningsFor(user.id);
+  const chains = await userChainsFor(user.id);
+  const earnings = await earningsFor(user.id);
 
   const total = earnings.reduce((s, e) => s + e.amount, 0);
   const now = new Date();

@@ -21,7 +21,7 @@ import { TEMPLATES } from "@/data/templates";
  * chain so the whole "start → publish → see ₹" loop is clickable on first run.
  */
 
-interface DB {
+export interface DB {
   users: User[];
   connections: Connection[];
   userChains: UserChain[];
@@ -165,41 +165,77 @@ function seed(): DB {
   };
 }
 
-// Persist across hot reloads in dev.
-const g = globalThis as unknown as { __mcDB?: DB };
-export const db: DB = g.__mcDB ?? (g.__mcDB = seed());
+/* --------------------------- persistence layer --------------------------- */
+import { cache } from "react";
+import { getStateCollection, STATE_ID } from "./mongo";
+
+/**
+ * The entire app state is one MongoDB document. `getDb()` loads it (deduped
+ * per request via React cache, seeded on first run). `persist()` saves it back.
+ * With no database configured it falls back to a fresh in-memory seed so local
+ * dev and the build still work.
+ */
+const loadState = cache(async (): Promise<DB> => {
+  const col = await getStateCollection();
+  if (!col) return seed();
+  const doc = await col.findOne({ _id: STATE_ID });
+  if (doc?.data) return doc.data as DB;
+  const seeded = seed();
+  await col.updateOne(
+    { _id: STATE_ID },
+    { $set: { data: seeded } },
+    { upsert: true }
+  );
+  return seeded;
+});
+
+export async function getDb(): Promise<DB> {
+  return loadState();
+}
+
+export async function persist(state: DB): Promise<void> {
+  const col = await getStateCollection();
+  if (!col) return;
+  await col.updateOne(
+    { _id: STATE_ID },
+    { $set: { data: state } },
+    { upsert: true }
+  );
+}
 
 /* ----------------------------- read helpers ----------------------------- */
 
-export function getUser(id: string): User | undefined {
-  return db.users.find((u) => u.id === id);
+export async function getUser(id: string): Promise<User | undefined> {
+  return (await getDb()).users.find((u) => u.id === id);
 }
-export function getUserByEmail(email: string): User | undefined {
-  return db.users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+export async function getUserByEmail(email: string): Promise<User | undefined> {
+  return (await getDb()).users.find(
+    (u) => u.email.toLowerCase() === email.toLowerCase()
+  );
 }
-export function connectionsFor(userId: string): Connection[] {
-  return db.connections.filter((c) => c.userId === userId);
+export async function connectionsFor(userId: string): Promise<Connection[]> {
+  return (await getDb()).connections.filter((c) => c.userId === userId);
 }
-export function userChainsFor(userId: string): UserChain[] {
-  return db.userChains.filter((c) => c.userId === userId);
+export async function userChainsFor(userId: string): Promise<UserChain[]> {
+  return (await getDb()).userChains.filter((c) => c.userId === userId);
 }
-export function userChain(id: string): UserChain | undefined {
-  return db.userChains.find((c) => c.id === id);
+export async function userChain(id: string): Promise<UserChain | undefined> {
+  return (await getDb()).userChains.find((c) => c.id === id);
 }
-export function contentFor(userId: string): GeneratedContent[] {
-  return db.content.filter((c) => c.userId === userId);
+export async function contentFor(userId: string): Promise<GeneratedContent[]> {
+  return (await getDb()).content.filter((c) => c.userId === userId);
 }
-export function earningsFor(userId: string): Earning[] {
-  return db.earnings
+export async function earningsFor(userId: string): Promise<Earning[]> {
+  return (await getDb()).earnings
     .filter((e) => e.userId === userId)
     .sort((a, b) => +new Date(a.occurredAt) - +new Date(b.occurredAt));
 }
-export function achievementsFor(userId: string): Achievement[] {
-  return db.achievements.filter((a) => a.userId === userId);
+export async function achievementsFor(userId: string): Promise<Achievement[]> {
+  return (await getDb()).achievements.filter((a) => a.userId === userId);
 }
-export function usageFor(userId: string): UsageRecord {
+export async function usageFor(userId: string): Promise<UsageRecord> {
   return (
-    db.usage.find((u) => u.userId === userId) ?? {
+    (await getDb()).usage.find((u) => u.userId === userId) ?? {
       userId,
       aiCreditsUsed: 0,
       aiCreditsLimit: 50,
@@ -209,7 +245,7 @@ export function usageFor(userId: string): UsageRecord {
   );
 }
 
-/** Simple id generator for mock writes. */
+/** Simple id generator. */
 export function newId(prefix: string): string {
   return `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
 }

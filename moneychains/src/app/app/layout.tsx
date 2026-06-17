@@ -10,7 +10,7 @@ export default async function AppLayout({
   children: React.ReactNode;
 }) {
   const user = await currentUser();
-  const usage = usageFor(user.id);
+  const usage = await usageFor(user.id);
 
   return (
     <ThemeProvider>

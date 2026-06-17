@@ -8,18 +8,12 @@ import { getProvider } from "@/services/oauth";
 import { getTemplate } from "@/data/templates";
 import { getPlatform } from "@/data/platforms";
 import { canStartChain, canGenerateContent } from "./limits";
-import {
-  db,
-  newId,
-  userChain as findUserChain,
-  usageFor,
-  connectionsFor,
-} from "./store";
+import { getDb, persist, newId, type DB } from "./store";
 import type { ChainTemplate, UserChain } from "./types";
 
 const XP_PER_STEP = 25;
 
-function award(userId: string, key: string, label: string) {
+function award(db: DB, userId: string, key: string, label: string) {
   const has = db.achievements.some((a) => a.userId === userId && a.key === key);
   if (!has) {
     db.achievements.push({
@@ -33,7 +27,12 @@ function award(userId: string, key: string, label: string) {
 }
 
 /** Advance a chain: mark `stepId` done and unlock the next locked step. */
-function advance(uc: UserChain, template: ChainTemplate, stepId: string) {
+function advance(
+  db: DB,
+  uc: UserChain,
+  template: ChainTemplate,
+  stepId: string
+) {
   const idx = uc.steps.findIndex((s) => s.stepId === stepId);
   if (idx === -1) return;
   if (uc.steps[idx].state !== "done") {
@@ -54,12 +53,13 @@ export async function startChainAction(slug: string) {
   const template = getTemplate(slug);
   if (!template) throw new Error("Unknown template");
 
+  const db = await getDb();
   const existing = db.userChains.find(
     (c) => c.userId === user.id && c.templateId === template.id
   );
   if (existing) redirect(`/app/chains/${existing.id}`);
 
-  const check = canStartChain(user);
+  const check = await canStartChain(user);
   if (!check.allowed) redirect(`/app/billing?gated=chains`);
 
   const uc: UserChain = {
@@ -74,31 +74,41 @@ export async function startChainAction(slug: string) {
     })),
   };
   db.userChains.push(uc);
+  await persist(db);
   revalidatePath("/app");
   redirect(`/app/chains/${uc.id}`);
 }
 
 export async function setNicheAction(userChainId: string, niche: string) {
-  const uc = findUserChain(userChainId);
+  const db = await getDb();
+  const uc = db.userChains.find((c) => c.id === userChainId);
   if (!uc) return;
   uc.niche = niche;
+  await persist(db);
   revalidatePath(`/app/chains/${userChainId}`);
 }
 
 export async function completeStepAction(userChainId: string, stepId: string) {
-  const uc = findUserChain(userChainId);
+  const db = await getDb();
+  const uc = db.userChains.find((c) => c.id === userChainId);
   if (!uc) return;
   const template = getTemplate(uc.templateId);
   if (!template) return;
-  advance(uc, template, stepId);
-  if (uc.status === "completed") award(uc.userId, "chain_complete", "Chain Complete");
+  advance(db, uc, template, stepId);
+  if (uc.status === "completed")
+    award(db, uc.userId, "chain_complete", "Chain Complete");
+  await persist(db);
   revalidatePath(`/app/chains/${userChainId}`);
   revalidatePath("/app");
 }
 
-export async function generateContentAction(userChainId: string, stepId: string) {
+export async function generateContentAction(
+  userChainId: string,
+  stepId: string
+) {
   const user = await currentUser();
-  const uc = findUserChain(userChainId);
+  const db = await getDb();
+  const uc = db.userChains.find((c) => c.id === userChainId);
   const template = getTemplate(uc?.templateId ?? "");
   if (!uc || !template) return;
   const step = template.steps.find((s) => s.id === stepId);
@@ -106,11 +116,11 @@ export async function generateContentAction(userChainId: string, stepId: string)
 
   const draft = await generateContent({ step, niche: uc.niche ?? "" });
 
-  const check = canGenerateContent(user, draft.creditsUsed);
+  const check = await canGenerateContent(user, draft.creditsUsed);
   if (!check.allowed) redirect(`/app/billing?gated=credits`);
 
-  const usage = usageFor(user.id);
-  usage.aiCreditsUsed += draft.creditsUsed;
+  const usage = db.usage.find((u) => u.userId === user.id);
+  if (usage) usage.aiCreditsUsed += draft.creditsUsed;
 
   const content = {
     id: newId("gc"),
@@ -127,12 +137,19 @@ export async function generateContentAction(userChainId: string, stepId: string)
   db.content.push(content);
   const ucStep = uc.steps.find((s) => s.stepId === stepId);
   if (ucStep) ucStep.outputContentId = content.id;
+  await persist(db);
   revalidatePath(`/app/chains/${userChainId}`);
 }
 
-export async function approveContentAction(contentId: string, userChainId: string, stepId: string) {
+export async function approveContentAction(
+  contentId: string,
+  userChainId: string,
+  stepId: string
+) {
+  const db = await getDb();
   const c = db.content.find((x) => x.id === contentId);
   if (c) c.approved = true;
+  await persist(db);
   await completeStepAction(userChainId, stepId);
 }
 
@@ -160,7 +177,10 @@ export async function connectAction(formData: FormData) {
     label = res.label;
   }
 
-  const existing = connectionsFor(user.id).find((c) => c.platformId === platformId);
+  const db = await getDb();
+  const existing = db.connections.find(
+    (c) => c.userId === user.id && c.platformId === platformId
+  );
   if (existing) {
     existing.status = "connected";
     existing.accessTokenEnc = token;
@@ -179,15 +199,18 @@ export async function connectAction(formData: FormData) {
       createdAt: new Date().toISOString(),
     });
   }
-  award(user.id, "first_connection", "First Connection");
+  award(db, user.id, "first_connection", "First Connection");
+  await persist(db);
   revalidatePath("/app/connections");
   const redirectTo = formData.get("redirectTo");
   if (redirectTo) redirect(String(redirectTo));
 }
 
 export async function disconnectAction(connectionId: string) {
+  const db = await getDb();
   const c = db.connections.find((x) => x.id === connectionId);
   if (c) c.status = "disconnected";
+  await persist(db);
   revalidatePath("/app/connections");
 }
 
@@ -198,6 +221,7 @@ export async function addEarningAction(formData: FormData) {
   const amount = Number(formData.get("amount"));
   if (!amount || amount <= 0) return;
   const userChainId = String(formData.get("userChainId") || "") || undefined;
+  const db = await getDb();
   db.earnings.push({
     id: newId("e"),
     userId: user.id,
@@ -208,7 +232,8 @@ export async function addEarningAction(formData: FormData) {
     note: String(formData.get("note") || "Manual entry"),
     occurredAt: new Date().toISOString(),
   });
-  award(user.id, "first_rupee", "First ₹ Earned");
+  award(db, user.id, "first_rupee", "First ₹ Earned");
+  await persist(db);
   revalidatePath("/app/earnings");
   revalidatePath("/app");
 }

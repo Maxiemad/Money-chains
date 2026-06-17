@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { currentUser } from "@/services/auth";
 import { getPlan } from "@/data/plans";
-import { db, usageFor } from "./store";
+import { getDb, persist } from "./store";
 import type { Plan } from "./types";
 
 const VALID_PLANS: Plan[] = ["free", "starter", "pro", "agency"];
@@ -19,9 +19,9 @@ function toLimit(value: number | "Unlimited"): number {
  * Switch the current user's plan.
  *
  * MOCK of Stripe Checkout — swap for a real Checkout Session + webhook.
- * In production this would create a Checkout Session, redirect to Stripe, and
- * the plan/usage mutation below would happen in the `checkout.session.completed`
- * webhook handler. Here we apply it inline against the in-memory store.
+ * In production the plan/usage mutation would happen in the
+ * `checkout.session.completed` webhook handler. Here we apply it inline and
+ * persist to the database.
  */
 export async function changePlanAction(formData: FormData) {
   const user = await currentUser();
@@ -31,29 +31,28 @@ export async function changePlanAction(formData: FormData) {
   const plan = getPlan(choice);
   if (!plan) return;
 
-  // Update the user's plan in the store.
+  const db = await getDb();
+
   const dbUser = db.users.find((u) => u.id === user.id);
   if (!dbUser) return;
   dbUser.plan = choice;
 
-  // Reset this user's usage limits to the chosen plan's limits. We keep the
-  // "used" counters (a real billing cycle would reset them on the period
-  // boundary, not on upgrade) but raise/lower the caps to the new plan.
-  const usage = usageFor(user.id);
+  // Raise/lower the caps to the new plan, keeping the "used" counters.
+  let usage = db.usage.find((u) => u.userId === user.id);
+  if (!usage) {
+    usage = {
+      userId: user.id,
+      aiCreditsUsed: 0,
+      aiCreditsLimit: 0,
+      automationRunsUsed: 0,
+      automationRunsLimit: 0,
+    };
+    db.usage.push(usage);
+  }
   usage.aiCreditsLimit = toLimit(plan.limits.aiCredits);
   usage.automationRunsLimit = toLimit(plan.limits.automationRuns);
 
-  // If the usage record wasn't yet in the store (e.g. the seeded admin), add it.
-  if (!db.usage.some((u) => u.userId === user.id)) {
-    db.usage.push({
-      userId: user.id,
-      aiCreditsUsed: usage.aiCreditsUsed,
-      aiCreditsLimit: usage.aiCreditsLimit,
-      automationRunsUsed: usage.automationRunsUsed,
-      automationRunsLimit: usage.automationRunsLimit,
-    });
-  }
-
+  await persist(db);
   revalidatePath("/app/billing");
   revalidatePath("/app");
 }
