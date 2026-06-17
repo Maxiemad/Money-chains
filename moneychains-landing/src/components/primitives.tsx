@@ -69,7 +69,7 @@ export function SectionEyebrow({
 /** Shiny clipped-gradient text style for the headline accent word. */
 export const gradientStyle: CSSProperties = {
   backgroundImage:
-    "linear-gradient(to right, #091020 0%, #0B2551 12.5%, #A4F4FD 32.5%, #00d2ff 50%, #0B2551 67.5%, #091020 87.5%, #091020 100%)",
+    "linear-gradient(to right, #2e1065 0%, #5b21b6 12.5%, #ede9fe 32.5%, #d8b4fe 50%, #5b21b6 67.5%, #2e1065 87.5%, #2e1065 100%)",
   backgroundSize: "200% auto",
   WebkitBackgroundClip: "text",
   backgroundClip: "text",

@@ -13,8 +13,9 @@ export function BackgroundVideo() {
           className="w-full h-full object-cover pointer-events-none"
           src={VIDEO_SRC}
         />
-        {/* darken slightly so content stays legible over the loop */}
-        <div className="absolute inset-0 bg-[#0c0c0c]/55" />
+        {/* lavender tint + darken for legibility */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-950/40 via-purple-900/30 to-purple-800/40" />
+        <div className="absolute inset-0 bg-[#0c0c0c]/35" />
       </div>
 
       {/* container-edge guide lines at the 36rem boundary */}

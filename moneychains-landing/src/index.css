@@ -17,7 +17,7 @@ body {
 }
 
 ::selection {
-  background-color: rgba(61, 129, 227, 0.3);
+  background-color: rgba(168, 85, 247, 0.3);
 }
 
 /* ---------------------------- Shiny headline ---------------------------- */
@@ -96,7 +96,7 @@ body {
   color: #fff;
 }
 .c3-watermark-line-2 {
-  background: linear-gradient(to right, #091020 0%, #0b2551 25%, #a4f4fd 65%, #00d2ff 100%);
+  background: linear-gradient(to right, #2e1065 0%, #5b21b6 25%, #ede9fe 65%, #d8b4fe 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -137,7 +137,7 @@ body {
 }
 .c3-card:hover {
   background: rgba(15, 15, 15, 0.6);
-  border-color: rgba(34, 211, 238, 0.7);
+  border-color: rgba(196, 181, 253, 0.7);
   transform: translateY(-12px) scale(1.01);
 }
 .c3-card-pro {
@@ -255,8 +255,8 @@ body {
   }
   .c3-watermark-line-2 {
     background: none;
-    -webkit-text-fill-color: #00d2ff;
-    color: #00d2ff;
+    -webkit-text-fill-color: #d8b4fe;
+    color: #d8b4fe;
   }
   .c3-grid {
     display: flex;

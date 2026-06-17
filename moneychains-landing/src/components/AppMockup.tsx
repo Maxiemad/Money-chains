@@ -27,8 +27,8 @@ const NAV = [
 ];
 
 const CATEGORIES = [
-  { label: "Affiliate", color: "#00d2ff" },
-  { label: "Content", color: "#A4F4FD" },
+  { label: "Affiliate", color: "#d8b4fe" },
+  { label: "Content", color: "#ede9fe" },
   { label: "E-commerce", color: "#f59e0b" },
   { label: "Newsletter", color: "#10b981" },
 ];
@@ -166,7 +166,7 @@ export function AppMockup() {
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       {c.unread && (
-                        <span className="w-2 h-2 rounded-full bg-[#00d2ff] shrink-0" />
+                        <span className="w-2 h-2 rounded-full bg-[#d8b4fe] shrink-0" />
                       )}
                       <span
                         className={`text-xs truncate ${
@@ -217,7 +217,7 @@ export function AppMockup() {
                 Pinterest → Blog → Amazon
               </h3>
               <div className="mt-3 flex items-center gap-2.5">
-                <span className="w-7 h-7 rounded-full bg-gradient-to-br from-[#00d2ff] to-[#0B2551] flex items-center justify-center text-xs font-semibold text-white">
+                <span className="w-7 h-7 rounded-full bg-gradient-to-br from-[#d8b4fe] to-[#5b21b6] flex items-center justify-center text-xs font-semibold text-white">
                   P
                 </span>
                 <div className="flex-1">
@@ -234,7 +234,7 @@ export function AppMockup() {
               {/* Summary by MoneyChains */}
               <div className="mt-5 liquid-glass rounded-lg p-3">
                 <div className="flex items-center gap-2 text-xs font-medium">
-                  <Sparkles className="w-3.5 h-3.5" style={{ color: "#A4F4FD" }} />
+                  <Sparkles className="w-3.5 h-3.5" style={{ color: "#ede9fe" }} />
                   <span className="text-white">Summary by MoneyChains</span>
                 </div>
                 <p className="mt-2 text-xs text-white/70 leading-[1.5]">
